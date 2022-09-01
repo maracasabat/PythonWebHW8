@@ -7,7 +7,7 @@ ORDER BY AVG(Marks.mark) DESC
 LIMIT 5;
 
 --2. Cтудент із найвищим середнім балом з одного предмета
-SELECT Courses.courseName CourseName, Students.studentName StudentName, round(AVG(Marks.mark),2) AverageMark
+SELECT Courses.courseName CourseName, Students.studentName StudentName, round(AVG(Marks.mark), 2) AverageMark
 FROM Marks
 JOIN Students ON Marks.studentsID = Students.studentID 
 JOIN Courses ON Marks.courseID = Courses.courseID 
@@ -21,56 +21,68 @@ FROM Marks
 JOIN Courses ON Marks.courseID = Courses.courseID 
 JOIN Groups ON Groups.groupID = Courses.groupID
 GROUP BY Marks.courseID 
-ORDER BY Courses.courseID
+ORDER BY Marks.mark DESC
 
---4. Середній бал у потоці. – Які курси читає викладач.
-SELECT Teachers.teacherName TeacherName, Courses.courseName CourseName, round(AVG(Marks.mark),2) AveregeMark 
+--4. Середній бал у потоці. 
+SELECT round(AVG(Marks.mark),2) AveregeMark 
 FROM Marks
-JOIN Courses ON Marks.courseID = Courses.courseID 
-JOIN Teachers ON Marks.teacherID = Teachers.teacherID 
-GROUP BY Marks.courseID 
-ORDER BY Courses.courseID
 
---5. Список студентів у групі
+--5. Які курси читає викладач.
+SELECT Teachers.teacherName TeacherName, Courses.courseName CourseName
+FROM Teachers
+JOIN Courses ON Courses.teacherID = Teachers.teacherID 
+WHERE Teachers.teacherID = 2
+
+--6. Список студентів у групі
 SELECT Groups.groupName GroupName, Students.studentName StudentName FROM Groups
 JOIN Students ON Students.groupID = Groups.groupID 
+WHERE Groups.groupID = 1
 
---6. Оцінки студентів у групі з предмета
-SELECT Students.studentName StudentName, Groups.groupName GroupName, Courses.courseName CourseName, Marks.mark StudentMark
+--7. Оцінки студентів у групі з предмета
+SELECT Students.studentName StudentName, Groups.groupName GroupName, Courses.courseName CourseName, Marks.markDate MarkDate, Marks.mark StudentMark
 FROM Marks
 JOIN Courses ON Marks.courseID = Courses.courseID 
 JOIN Groups ON Groups.groupID = Courses.groupID
 JOIN Students ON Students.groupID = Groups.groupID
-WHERE Groups.groupName = 'EN01'
+WHERE Groups.groupID = 2 AND Courses.courseID = 2
 ORDER BY Students.studentName 
 
 
---7. Оцінки студентів у групі з предмета на останньому занятті
+--8. Оцінки студентів у групі з предмета на останньому занятті
 SELECT Students.studentName StudentName, Groups.groupName GroupName, Courses.courseName CourseName, Marks.mark StudentMark, Marks.markDate MarkDate
 FROM Marks
 JOIN Courses ON Marks.courseID = Courses.courseID 
 JOIN Groups ON Groups.groupID = Courses.groupID
 JOIN Students ON Students.groupID = Groups.groupID
-WHERE Groups.groupName = 'EN01' AND Marks.markDate = '2021-12-01'
-ORDER BY Marks.markDate DESC
+WHERE Groups.groupID = 2 AND Marks.markDate = (
+SELECT Marks.markDate FROM Marks ORDER BY Marks.markDate DESC LIMIT 1)
+ORDER BY Marks.markDate
 
---8. Список курсів, які відвідує студент
+--9. Список курсів, які відвідує студент
 SELECT Students.studentName StudentName, Courses.courseName CourseName
 FROM Students
 JOIN Courses ON Courses.groupID = Students.groupID
-WHERE Students.studentName = 'Єлисей Юрченко'
+WHERE Students.studentID = 30
 
---9. Список курсів, які студенту читає викладач. – Середній бал, який викладач ставить студенту
-SELECT Courses.courseName CourseName, Teachers.teacherName TeacherName, round(AVG(Marks.mark),2)
+--10. Список курсів, які студенту читає викладач.
+SELECT Courses.courseName CourseName, Teachers.teacherName TeacherName, Students.studentName StudentName
+FROM Courses
+JOIN Teachers ON Courses.teacherID = Teachers.teacherID 
+JOIN Groups ON Groups.groupID = Courses.groupID 
+JOIN Students ON Students.groupID = Groups.groupID 
+WHERE Teachers.teacherID = 2 AND Students.studentID = 15
+
+--11. Середній бал, який викладач ставить студенту
+SELECT Students.studentName StudentName, Teachers.teacherName, round(AVG(Marks.mark), 2) AvaregeMark
+FROM Marks
+JOIN Teachers ON Teachers.teacherID = Marks.teacherID 
+JOIN Students ON Students.studentID = Marks.studentsID 
+WHERE Students.studentID = 25 AND Teachers.teacherID = 3
+GROUP BY Students.studentName
+
+--12. Середній бал, який ставить викладач
+SELECT Teachers.teacherName TeacherName, round(AVG(Marks.mark), 2) AveregeMark
 FROM Marks
 JOIN Teachers ON Teachers.teacherID = Marks.teacherID
-JOIN Courses ON Courses.teacherID  = Teachers.teacherID 
-GROUP BY Courses.courseName
-
---10. Середній бал, який ставить викладач
-SELECT Teachers.teacherName TeacherName, round(AVG(Marks.mark),2) AveregeMark
-FROM Marks
-JOIN Teachers ON Teachers.teacherID = Marks.teacherID
+WHERE Teachers.teacherID = 3
 GROUP BY Teachers.teacherName 
-
-
